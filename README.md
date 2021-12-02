@@ -1,10 +1,13 @@
-# Very short description of the package
+# IFRS® Standards Accounting for Laravel
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/seyls/accounting.svg?style=flat-square)](https://packagist.org/packages/seyls/accounting)
 [![Total Downloads](https://img.shields.io/packagist/dt/seyls/accounting.svg?style=flat-square)](https://packagist.org/packages/seyls/accounting)
 ![GitHub Actions](https://github.com/seyls/accounting/actions/workflows/main.yml/badge.svg)
 
-This is where your description should go. Try and limit it to a paragraph or two, and maybe throw in a mention of what PSRs you support to avoid any confusion with users and contributors.
+This Package enables any Laravel application to generate International Financial Reporting Standards compatible Financial Statements by providing a fully featured and configurable Double Entry accounting subsystem.
+
+This package is just an optimized version of [eloquent-ifrs](https://github.com/ekmungai/eloquent-ifrs) by [Edward Mungai](https://github.com/ekmungai)
+
 
 ## Installation
 
@@ -40,13 +43,10 @@ If you discover any security related issues, please email hickr@me.com instead o
 
 ## Credits
 
--   [Hicker](https://github.com/seyls)
+-   [Hicker](https://github.com/hicka)
+-   [Edward Mungai](https://github.com/ekmungai)
 -   [All Contributors](../../contributors)
 
 ## License
 
 The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
-
-## Laravel Package Boilerplate
-
-This package was generated using the [Laravel Package Boilerplate](https://laravelpackageboilerplate.com).
