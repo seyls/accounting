@@ -1,0 +1,35 @@
+<?php
+
+/**
+ * Eloquent IFRS Accounting
+ *
+ * @author    Edward Mungai
+ * @copyright Edward Mungai, 2020, Germany
+ * @license   MIT
+ */
+
+namespace Seyls\Accounting\Exceptions;
+
+use Seyls\Accounting\Models\Account;
+use Seyls\Accounting\Models\Transaction;
+
+class MainAccount extends IFRSException
+{
+    /**
+     * Main Account Exception
+     *
+     * @param string $transactionType
+     * @param string $accountType
+     * @param string $message
+     * @param int $code
+     */
+    public function __construct(string $transactionType, string $accountType, string $message = null, int $code = null)
+    {
+        $transactionType = Transaction::getType($transactionType);
+        $accountType = Account::getType($accountType);
+
+        $error = $transactionType . " Main Account must be of type " . $accountType;
+
+        parent::__construct($error . ' ' . $message, $code);
+    }
+}

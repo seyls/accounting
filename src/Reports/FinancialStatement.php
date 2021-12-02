@@ -1,0 +1,228 @@
+<?php
+
+/**
+ * Eloquent IFRS Accounting
+ *
+ * @author    Edward Mungai
+ * @copyright Edward Mungai, 2020, Germany
+ * @license   MIT
+ */
+
+namespace Seyls\Accounting\Reports;
+
+use Illuminate\Support\Facades\Auth;
+
+use Seyls\Accounting\Models\Entity;
+use Seyls\Accounting\Models\Account;
+use Seyls\Accounting\Models\ReportingPeriod;
+
+/**
+ *
+ * @author emung
+ */
+abstract class FinancialStatement
+{
+
+    /**
+     * Financial Statement Reporting Period.
+     *
+     * @var string
+     */
+    public $reportingPeriod = null;
+    /**
+     * Financial Statement balances.
+     *
+     * @var array
+     */
+    public $balances = [
+        "debit" => 0,
+        "credit" => 0,
+    ];
+    /**
+     * Financial Statement accounts.
+     *
+     * @var array
+     */
+    public $accounts = [];
+    /**
+     * Financial Statement totals.
+     *
+     * @var array
+     */
+    public $totals = [];
+    /**
+     * Financial Statement results.
+     *
+     * @var array
+     */
+    public $results = [];
+    /**
+     * Financial Statement Entity.
+     *
+     * @var Entity
+     */
+    protected $entity;
+
+    /**
+     * Construct Financial Statement for the given period
+     *
+     * @param ReportingPeriod $period
+     */
+    public function __construct(ReportingPeriod $period = null, Entity $entity = null)
+    {
+        if (is_null($entity)) {
+            $this->entity = Auth::user()->entity;
+        }else{
+            $this->entity = $entity;
+        }
+        $this->reportingPeriod = is_null($period) ? $this->entity->currentReportingPeriod : $period;
+
+        $this->statement = "";
+        $this->indent = "    ";
+        $this->separator = "                        ---------------";
+        $this->grand_total = "                        ===============";
+        $this->result_indents = 4;
+    }
+
+    /**
+     * Print Financial Statement attributes.
+     *
+     * @return array
+     */
+    public function attributes()
+    {
+        return [
+            "Entity" => $this->entity->name,
+            "ReportingPeriod" => $this->reportingPeriod,
+            "Balances" => $this->balances
+        ];
+    }
+
+    /**
+     * @param bool $fullbalance
+     *
+     * Get Statement Sections.
+     */
+    public function getSections($startDate = null, $endDate = null, $fullbalance = true): array
+    {
+        foreach (array_keys($this->accounts) as $section) {
+            foreach (config('accounting')[$section] as $accountType) {
+                $sectionBalances = Account::sectionBalances([$accountType], $startDate, $endDate, $fullbalance, $this->entity);
+
+                if ($sectionBalances["sectionClosingBalance"] <> 0) {
+
+                    $this->accounts[$section][$accountType] = $sectionBalances["sectionCategories"];
+                    $this->balances[$section][$accountType] = $sectionBalances["sectionClosingBalance"];
+                    $this->totals[$section] += $sectionBalances["sectionClosingBalance"];
+
+                    if ($sectionBalances["sectionClosingBalance"] < 0) {
+                        $this->balances["credit"] += abs($sectionBalances["sectionClosingBalance"]);
+                    } else {
+                        $this->balances["debit"] += abs($sectionBalances["sectionClosingBalance"]);
+                    }
+                }
+            }
+        }
+
+        return [];
+    }
+
+    /**
+     * Print Statement Title
+     *
+     * @param string $statement
+     * @param string $title
+     *
+     * @return string
+     *
+     * @codeCoverageIgnore
+     */
+    protected function printTitle(string $statement, string $title)
+    {
+        $dateFormat = 'M d Y';
+        $statement .= PHP_EOL;
+        $statement .= $this->entity->name . PHP_EOL;
+        $statement .= config('accounting')['statements'][$title] . PHP_EOL;
+
+        $period = in_array(
+            'startDate',
+            array_keys($this->period)
+        ) ? "For the Period: " . $this->period['startDate']->format(
+                $dateFormat
+            ) . " to " . $this->period['endDate']->format(
+                $dateFormat
+            ) . PHP_EOL : "As at: " . $this->period['endDate']->format(
+                $dateFormat
+            ) . PHP_EOL;
+
+        return $statement .= $period;
+    }
+
+    /**
+     * Print Statement Section
+     *
+     * @param string $section
+     * @param string $statement
+     * @param string $indent
+     *
+     * @return string
+     *
+     * @codeCoverageIgnore
+     */
+    protected function printSection(string $section, string $statement, string $indent, int $amountFactor = 1)
+    {
+        $accountNames = array_merge(config('accounting')['accounts'], config('accounting')['statements']);
+
+        $statement .= PHP_EOL;
+        $statement .= $accountNames[$section] . PHP_EOL;
+
+        foreach (array_keys($this->balances[$section]) as $name) {
+            $statement .= $indent . $accountNames[$name] . $indent;
+            $statement .= $indent . $this->balances[$section][$name] * $amountFactor . PHP_EOL;
+        }
+
+        return $statement;
+    }
+
+    /**
+     * Print Statement Total
+     *
+     * @param string $statement
+     * @param string $section
+     * @param string $indent
+     * @param int $indentFactor
+     *
+     * @return string
+     *
+     * @codeCoverageIgnore
+     */
+    protected function printTotal(string $section, string $statement, string $indent, int $amountFactor = 1, int $indentFactor = 1)
+    {
+        $accountNames = array_merge(config('accounting')['accounts'], config('accounting')['statements']);
+
+        $statement .= $this->separator . PHP_EOL;
+        $statement .= 'Total ' . $accountNames[$section] . str_repeat($indent, $indentFactor);
+
+        return $statement .= $this->totals[$section] * $amountFactor . PHP_EOL;
+    }
+
+    /**
+     * Print Statement Result
+     *
+     * @param string $statement
+     * @param string $result
+     * @param string $indent
+     * @param int $indentFactor
+     *
+     * @return string
+     *
+     * @codeCoverageIgnore
+     */
+    protected function printResult(string $result, string $statement, string $indent, int $indentFactor)
+    {
+        $statement .= $this->separator . PHP_EOL;
+        $statement .= config('accounting')['statements'][$result] . str_repeat($indent, $indentFactor);
+
+        return $statement .= $this->results[$result] . PHP_EOL;
+    }
+}

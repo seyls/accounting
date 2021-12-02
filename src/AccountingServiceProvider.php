@@ -3,6 +3,8 @@
 namespace Seyls\Accounting;
 
 use Illuminate\Support\ServiceProvider;
+use Seyls\Accounting\Managers\EntityManager;
+use Seyls\Accounting\Services\EntityService;
 
 class AccountingServiceProvider extends ServiceProvider
 {
@@ -16,8 +18,9 @@ class AccountingServiceProvider extends ServiceProvider
          */
         // $this->loadTranslationsFrom(__DIR__.'/../resources/lang', 'accounting');
         // $this->loadViewsFrom(__DIR__.'/../resources/views', 'accounting');
-        // $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
+         $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
         // $this->loadRoutesFrom(__DIR__.'/routes.php');
+        $this->loadFactoriesFrom(__DIR__ . '/../database/factories');
 
         if ($this->app->runningInConsole()) {
             $this->publishes([
