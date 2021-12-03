@@ -933,7 +933,7 @@ class TrialBalanceTest extends TestCase
             'name' => $this->faker->name,
             'code' => $this->faker->randomLetter(),
             'entity_id' => $entity->id,
-            'rate' => $this->faker->randomDigit(),
+            'rate' => $this->faker->randomDigitNotNull,
             'account_id' => Account::create([
                 'account_type' => Account::CONTROL,
                 'category_id' => null,
