@@ -103,7 +103,7 @@ class LineItem extends Model implements Recyclable, Segregatable
             AppliedVat::firstOrCreate([
                 'vat_id' => $vat->id,
                 'line_item_id' => $this->id,
-                'amount' => $tax
+                'amount' => $tax,
             ]);
             $itemAmount += $this->compound_vat ? $tax : 0;
         }
