@@ -264,9 +264,9 @@ class Ledger extends Model implements Segregatable
      */
     public function save(array $options = []): bool
     {
-        parent::save();
+       // parent::save();
 
-        $this->hash = hash(config('accounting')['hashing_algorithm'], $this->hashed());
+        //$this->hash = hash(config('accounting')['hashing_algorithm'], $this->hashed());
 
         return parent::save();
     }
