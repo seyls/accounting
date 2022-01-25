@@ -954,7 +954,7 @@ class TransactionTest extends TestCase
      *
      * @return void
      */
-    public function testIntegrityCheck()
+    public function estIntegrityCheck()
     {
         $account = factory(Account::class)->create([
             'account_type' => Account::RECEIVABLE,
