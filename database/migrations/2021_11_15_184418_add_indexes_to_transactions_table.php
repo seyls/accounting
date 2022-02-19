@@ -15,7 +15,7 @@ class AddIndexesToTransactionsTable extends Migration
     public function up()
     {
         Schema::table(config('accounting.table_prefix').'transactions', function (Blueprint $table) {
-            $table->index(['transaction_type','transaction_date','entity_id'],"type_date_entity_index");
+            $table->index(['transaction_type','entity_id'],"type_entity_index");
         });
     }
 
@@ -27,7 +27,7 @@ class AddIndexesToTransactionsTable extends Migration
     public function down()
     {
         Schema::table(config('accounting.table_prefix').'transactions', function (Blueprint $table) {
-            $table->dropIndex('type_date_entity_index');
+            $table->dropIndex('type_entity_index');
         });
     }
 }
